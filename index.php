@@ -121,7 +121,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="public/css/tailwind.css">
 </head>
 <body class="bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md ml-30">
         <h2 class="text-3xl font-bold text-center mb-6 text-gray-800">Detalles del Electrodoméstico</h2>
         <table class="w-full">
             <tr>
