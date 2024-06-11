@@ -39,52 +39,28 @@
 </html>
 
 <?php
-// Verificar si se ha enviado un formulario por el método POST
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Almacenar la información del formulario en un array asociativo
-    $electrodomestico = [
-        'nombre' => $_POST['nombre'],
-        'color' => $_POST['color'],
-        'consumo' => $_POST['consumo'],
-        'peso' => $_POST['peso']
-    ];
 
-    // Consideraciones
-    // Consumo energético
-    $consumo = strtoupper($electrodomestico['consumo']);
-    if (!in_array($consumo, ['A', 'B', 'C'])) {
-        $consumo = 'C'; // Por defecto, asignar letra C
+function limpiarYValidarDatos($data) {
+    $data['consumo'] = strtoupper($data['consumo']);
+    if (!in_array($data['consumo'], ['A', 'B', 'C'])) {
+        $data['consumo'] = 'C';
     }
 
-    // Peso
-    $peso = floatval($electrodomestico['peso']);
-    if ($peso < 0 || $peso > 49) {
-        $peso = 1; // Por defecto, asignar 1 kg
+    $data['peso'] = floatval($data['peso']);
+    if ($data['peso'] < 0 || $data['peso'] > 49) {
+        $data['peso'] = 1;
     }
 
-    // Color
     $colores_permitidos = ['blanco', 'gris', 'negro'];
-    $color = strtolower($electrodomestico['color']);
-    if (!in_array($color, $colores_permitidos)) {
-        $color = 'blanco'; // Por defecto, asignar blanco
+    $data['color'] = strtolower($data['color']);
+    if (!in_array($data['color'], $colores_permitidos)) {
+        $data['color'] = 'blanco';
     }
 
-    // Actualizar valores en el array
-    $electrodomestico['consumo'] = $consumo;
-    $electrodomestico['peso'] = $peso;
-    $electrodomestico['color'] = $color;
+    return $data;
+}
 
-    // Calcular el descuento basado en el color
-    $descuentos = [
-        'blanco' => 0.05,
-        'gris' => 0.07,
-        'negro' => 0.10
-    ];
-
-    // Verificar si el color tiene un descuento asociado
-    $descuento = isset($descuentos[$color]) ? $descuentos[$color] : 0;
-
-    // Calcular el precio base multiplicando el consumo energético por el valor de peso
+function calcularPrecioBase($consumo, $peso) {
     $precio_base = 0;
     switch ($consumo) {
         case 'A':
@@ -104,12 +80,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } elseif ($peso >= 20 && $peso <= 49) {
         $precio_base *= 50;
     }
+    return $precio_base;
+}
 
-    // Calcular el precio con descuento aplicado
+function calcularDescuento($color) {
+    $descuentos = [
+        'blanco' => 0.05,
+        'gris' => 0.07,
+        'negro' => 0.10
+    ];
+    return $descuentos[$color] ?? 0;
+}
+
+function calcularPrecioFinal($precio_base, $descuento) {
+    return $precio_base * (1 - $descuento);
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $electrodomestico = [
+        'nombre' => $_POST['nombre'],
+        'color' => $_POST['color'],
+        'consumo' => $_POST['consumo'],
+        'peso' => $_POST['peso']
+    ];
+
+    $electrodomestico = limpiarYValidarDatos($electrodomestico);
+    $precio_base = calcularPrecioBase($electrodomestico['consumo'], $electrodomestico['peso']);
+    $descuento = calcularDescuento($electrodomestico['color']);
+    $precio_final = calcularPrecioFinal($precio_base, $descuento);
     $precio_con_descuento = $precio_base * (1 - $descuento);
-
-    // Calcular el precio final sumando el precio base, el descuento y los precios adicionales
-    $precio_final = $precio_con_descuento;
 ?>
 
 <!DOCTYPE html>
